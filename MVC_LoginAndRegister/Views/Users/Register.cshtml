@@ -33,7 +33,7 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+                <input onclick="sendEmail();" type="submit" value="Create" class="btn btn-default" />
             </div>
         </div>
     </div>
@@ -43,6 +43,24 @@
     @Html.ActionLink("Back to List", "Index")
 </div>
 
+
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
 }
+
+<script>
+    var sendEmail = function () {
+        $.ajax({
+            type: "Post",
+            url: "/Users/SendMailToUser",
+            success: function (data) {
+                if (data == true) {
+                    alert("Success");
+                }
+                else {
+                    alert("fail");
+                }
+            }
+        })
+    }
+</script>

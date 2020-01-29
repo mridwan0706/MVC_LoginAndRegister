@@ -258,6 +258,7 @@
     <Content Include="Views\Users\Welcome.cshtml" />
     <Content Include="Views\Users\LoginMember.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Users\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

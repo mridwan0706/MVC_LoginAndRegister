@@ -1,16 +1,19 @@
 ﻿using MVC_LoginAndRegister.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 
 namespace MVC_LoginAndRegister.Controllers
 {
-    
+
+
     public class UsersController : Controller
     {
         ApplicationDbContext myContext = new ApplicationDbContext();
@@ -36,13 +39,19 @@ namespace MVC_LoginAndRegister.Controllers
             return View("Register", new User());
         }
 
+       
+
         [HttpPost]
-        public ActionResult Register(User user)
+        public ActionResult Register(User user, string toEmail, string subject, string emailBody)
         {
             user.Password = Hashing.EnncryptPassword(user.Password);
             myContext.UsersLogin.Add(user);
             myContext.SaveChanges();
-            MailMessage mm = new MailMessage("mridwan0706@gmail.com", user.Username);
+
+            string SendEmail = System.Configuration.ConfigurationManager.AppSettings["SenderEmail"].ToString();
+            string senderPassword = System.Configuration.ConfigurationManager.AppSettings["senderPassword"].ToString(); ;
+
+            MailMessage mm = new MailMessage(SendEmail, user.Username);
             mm.Subject = "[Password]" + DateTime.Now.ToString("ddMMyyyyhhmmss");
             mm.Body = "Hi " + user.Username + "\n This is Your New Password :" + user.Password;
 
@@ -50,23 +59,34 @@ namespace MVC_LoginAndRegister.Controllers
             smtp.Host = "smtp.gmail.com";
             smtp.Port = 587;
             smtp.EnableSsl = true;
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
 
-            NetworkCredential nc = new NetworkCredential("codeliveproject@gmail.com", "mypassword");
+            NetworkCredential nc = new NetworkCredential(SendEmail, senderPassword);
             smtp.UseDefaultCredentials = false;
             smtp.Credentials = nc;
             smtp.Send(mm);
             ViewBag.Message = "Password Has Benn Sent.Check Your Email to Login";
-            return RedirectToAction("ListUser", "Users");
+            
+           
+            return RedirectToAction("Index", "Home");
         }
 
         // GET: Users
 
         // GET: /Account/Login
         [AllowAnonymous]
-        public ActionResult LoginMember(string returnUrl)
+        public ActionResult LoginMember(string returnUrl,User user)
         {
-            ViewBag.ReturnUrl = returnUrl;
-            return View();
+            if (Session["username"] != null)
+            {
+                return RedirectToAction("Index","Dashboard");
+            }
+            else
+            {
+                ViewBag.ReturnUrl = returnUrl;
+                return View();
+            }
+            
         }
 
         [HttpPost]
@@ -79,6 +99,8 @@ namespace MVC_LoginAndRegister.Controllers
                 {
                     Session["id"] = user.Id;
                     Session.Add("username", user.Username);
+                                  
+
                     //return View("Welcome");
                     return View("Welcome");
                 }
@@ -162,18 +184,26 @@ namespace MVC_LoginAndRegister.Controllers
 
         // POST: Users/Delete/5
         [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
+        public ActionResult Delete(int id,User user)
         {
+
             try
             {
                 // TODO: Add delete logic here
+                var del = myContext.UsersLogin.Find(id);
+                myContext.UsersLogin.Remove(del);
+                myContext.SaveChanges();
 
-                return RedirectToAction("Index");
+
+                return RedirectToAction("ListUser","Users");
             }
             catch
             {
                 return View();
             }
         }
+
+
+       
     }
 }

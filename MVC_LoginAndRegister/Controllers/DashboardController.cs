@@ -11,7 +11,15 @@ namespace MVC_LoginAndRegister.Controllers
         // GET: Dashboard
         public ActionResult Index()
         {
-            return View();
+            if (Session["id"] == null)
+            {
+                return RedirectToAction("LoginMember", "Users");
+            }
+            else
+            {
+                return View();
+            }     
+
         }
 
         // GET: Dashboard/Details/5
